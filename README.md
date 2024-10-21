@@ -2,84 +2,124 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Para levantar este proyecto de manera local siga las instrucciones
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- 1. Descargue e instale Node en su versión LTS > 20.x.x
+- 2. Dirigase al directorio del proyecto y ejecute 'npm install'
+- 3. Cree un archivo .env en el root del directorio con las claves y valores de .env.template.local:
+- 4. Ejecute 'npm run start'
 
-## Description
+## Endpoints
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Login
 
-## Project setup
+- **URL**: `POST localhost:3000/auth/login`
+- **Descripción**: Inicia Sesión al sistema como 'student'
+- **Cuerpo**:
+  ```json
+  {
+    "email": "correo electronico del usuario",
+    "password": "contraseña del usuario"
+  }
+  ```
+  **Respuesta**:
+  ```json
+  {
+    "token": "jwt token del usuario firmado por el sistema"
+  }
+  ```
 
-```bash
-$ npm install
-```
+### Logout
 
-## Compile and run the project
+- **URL**: `POST localhost:3000/auth/logout`
+- **Descripción**: Cierra sesíon en el sistema, requiere de un JWT token generado por el sistema previamente (Debe haber iniciado sesión, requiere JWT bearer token en el header).
+- **Cuerpo**: No requiere cuerpo, pero si el jwt bearer token en el header
+  **Respuesta**:
+  ```json
+  {
+    "message": "The token is now blacklisted"
+  }
+  ```
 
-```bash
-# development
-$ npm run start
+### Register
 
-# watch mode
-$ npm run start:dev
+- **URL**: `POST localhost:3000/auth/register`
+- **Descripción**: Crea un usuario con el rol de 'student'
+- **Cuerpo**:
+  ```json
+  {
+    "name": "Nombre del usuario",
+    "firstLastName": "Primer apellido del usuario",
+    "secondLastName": "Segundo apellido del usuario",
+    "rut": "Rut del usuario",
+    "email": "Correo electronico del usuario",
+    "carerId": "Id de la carrera a la que pertenece el usuario",
+    "password": "Contraseña del usuario",
+    "repeatedPassword": "Contraseña repetida para verificacion del usuario"
+  }
+  ```
+  **Respuesta**:
+  ```json
+  {
+    "name": "Nombre del usuario",
+    "firstLastName": "Primer apellido del usuario",
+    "secondLastName": "Segundo apellido del usuario",
+    "rut": "Rut del usuario",
+    "email": "Correo electronico del usuario",
+    "carerId": "Id de la carrera a la que pertenece el usuario",
+    "hashedPassword": "Contraseña hasheada con Bcrypt salt de valor 12",
+    "Role": "Rol del usuario en el sistema"
+  }
+  ```
 
-# production mode
-$ npm run start:prod
-```
+### Update Profile
 
-## Run tests
+- **URL**: `PUT localhost:3000/user/update-profile`
+- **Descripción**: Actualiza el nombre o el primer apellido o el segundo apellido (Debe haber iniciado sesión, requiere JWT bearer token en el header)
+- **Cuerpo**:
+  ```json
+  {
+    "name": "Nombre del usuario",
+    "firstLastName": "Primer apellido del usuario",
+    "secondLastName": "Segundo apellido del usuario"
+  }
+  ```
+  **Respuesta**:
+  ```json
+  {
+    "name": "Nombre del usuario (actualizado)",
+    "firstLastName": "Primer apellido del usuario (actulizado)",
+    "secondLastName": "Segundo apellido del usuario (actualizado)",
+    "rut": "Rut del usuario",
+    "email": "Correo electronico del usuario",
+    "carerId": "Id de la carrera a la que pertenece el usuario",
+    "hashedPassword": "Contraseña hasheada con Bcrypt salt de valor 12",
+    "Role": "Rol del usuario en el sistema"
+  }
+  ```
 
-```bash
-# unit tests
-$ npm run test
+### Update Password
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **URL**: `PUT localhost:3000/auth/update-password`
+- **Descripción**: Actualiza la contraseña del usuario (Debe haber iniciado sesión, requiere JWT bearer token en el header)
+- **Cuerpo**:
+  ```json
+  {
+    "currentPassword": "Contraseña actual",
+    "password": "Nueva contraseña",
+    "repeatedPassword": "Nueva contraseña repetida para proceso de verificación"
+  }
+  ```
+  **Respuesta**:
+  ```json
+  {
+    "name": "Nombre del usuario",
+    "firstLastName": "Primer apellido del usuario",
+    "secondLastName": "Segundo apellido del usuario",
+    "rut": "Rut del usuario",
+    "email": "Correo electronico del usuario",
+    "carerId": "Id de la carrera a la que pertenece el usuario",
+    "hashedPassword": "Contraseña hasheada con Bcrypt salt de valor 12 (actualizada)",
+    "Role": "Rol del usuario en el sistema"
+  }
+  ```
