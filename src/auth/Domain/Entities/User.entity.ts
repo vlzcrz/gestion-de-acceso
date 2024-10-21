@@ -16,4 +16,8 @@ export class User {
 
     public Role: string,
   ) {}
+
+  public changePassword(newHashedPassword: string) {
+    this.HashedPassword = newHashedPassword;
+  }
 }

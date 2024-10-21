@@ -9,9 +9,11 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenRepository } from './Infrastructure/Repositories/Token.repository';
+import { JwtStrategy } from './Strategies/Jwt.strategy';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([User, Token]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -28,6 +30,6 @@ import { TokenRepository } from './Infrastructure/Repositories/Token.repository'
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, TokenRepository],
+  providers: [AuthService, UserRepository, TokenRepository, JwtStrategy],
 })
 export class AuthModule {}

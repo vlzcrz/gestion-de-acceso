@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from '../../Application/Services/Auth.service';
 import { RegisterUserDTO } from '../DTOs/RegisterUser.dto';
@@ -13,6 +16,7 @@ import { LoginUserDTO } from '../DTOs/LoginUser.dto';
 import { UpdateUserPasswordDTO } from '../DTOs/UpdateUserPassword.dto';
 import { LogoutUserDTO } from '../DTOs/LogoutUser.dto';
 import { ValidateTokenDTO } from '../DTOs/ValidateToken.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +33,14 @@ export class AuthController {
   }
 
   @Post('Logout')
-  logout(@Body() LogoutUserDTO: LogoutUserDTO) {
-    return this.authService.logout(LogoutUserDTO);
+  @UseGuards(AuthGuard('jwt'))
+  logout(@Request() req) {
+    return this.authService.logout(
+      req.user.jwt_uuid,
+      req.user.email,
+      req.user.iat,
+      req.user.exp,
+    );
   }
 
   @Post('Validate')
@@ -38,8 +48,16 @@ export class AuthController {
     return this.authService.validate(ValidateTokenDTO);
   }
 
-  @Post('UpdatePassword')
-  updatePassword(@Body() UpdateUserPasswordDTO: UpdateUserPasswordDTO) {
-    return this.authService.updatePassword(UpdateUserPasswordDTO);
+  @Put('update-password')
+  @UseGuards(AuthGuard('jwt'))
+  updatePassword(
+    @Body() UpdateUserPasswordDTO: UpdateUserPasswordDTO,
+    @Request() req,
+  ) {
+    return this.authService.updatePassword(
+      UpdateUserPasswordDTO,
+      req.user.jwt_uuid,
+      req.user.email,
+    );
   }
 }

@@ -19,8 +19,8 @@ export class UserService {
   }
 
   async GetUserByEmail(UserByEmailDTO: UserByEmailDTO) {
-    const { Email } = UserByEmailDTO;
-    const user = await this.userRepository.GetByEmail(Email);
+    const { email } = UserByEmailDTO;
+    const user = await this.userRepository.GetByEmail(email);
     if (!user)
       throw new BadRequestException(
         'There is no user associated with this Email',
@@ -29,12 +29,12 @@ export class UserService {
   }
 
   async UpdateProfile(UpdateProfileDTO: UpdateProfileDTO) {
-    const { Email, Name, FirstLastName, SecondLastName } = UpdateProfileDTO;
+    const { email, name, firstLastName, secondLastName } = UpdateProfileDTO;
     const updateUser = await this.userRepository.ChangeNameAndLastNames(
-      Email,
-      Name,
-      FirstLastName,
-      SecondLastName,
+      email,
+      name,
+      firstLastName,
+      secondLastName,
     );
     if (!updateUser)
       throw new BadRequestException(

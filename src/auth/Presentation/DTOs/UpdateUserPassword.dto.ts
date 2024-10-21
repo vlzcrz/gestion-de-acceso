@@ -2,9 +2,11 @@ import { IsEmail, IsString } from 'class-validator';
 
 export class UpdateUserPasswordDTO {
   @IsString()
-  @IsEmail()
-  Email: string;
+  currentPassword: string;
 
   @IsString()
-  newPassword: string;
+  password: string;
+
+  @IsString()
+  repeatedPassword: string;
 }

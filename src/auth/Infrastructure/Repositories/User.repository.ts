@@ -60,7 +60,6 @@ export class UserRepository implements IUserRepository {
       where: { Email: User_email },
     });
     if (!user) return null;
-    // AQUI HAY QUE HASHEAR LA PASSWORD A UN HMAC256
     user.HashedPassword = newHashedPassword;
     await this.userRepository.save(user);
 
