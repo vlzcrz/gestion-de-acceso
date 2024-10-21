@@ -72,6 +72,23 @@
   }
   ```
 
+### Validate Token
+
+- **URL**: `PUT localhost:3000/auth/validate`
+- **Descripción**: verifica que el token no este revocado (que no se encuentre en la blacklist) entrega un boolean (true si es valudo su uso, y falso si ya esta presente en la blacklist)
+- **Cuerpo**:
+  ```json
+  {
+    "token": "Cadena string del JWT"
+  }
+  ```
+  **Respuesta**:
+  ```json
+  {
+    "isValid": true
+  }
+  ```
+
 ### Update Profile
 
 - **URL**: `PUT localhost:3000/user/update-profile`

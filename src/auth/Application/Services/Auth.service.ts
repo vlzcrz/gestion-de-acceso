@@ -182,9 +182,14 @@ export class AuthService {
   }
 
   async validate(ValidateTokenDTO: ValidateTokenDTO) {
-    const { token_uuid } = ValidateTokenDTO;
+    const { token } = ValidateTokenDTO;
+    const decodedToken = await this.jwtService.decode(token);
+    const token_uuid = decodedToken.Jwt_uuid;
     const isBlackListed =
       await this.tokenRepository.ValidateTokenByUuid(token_uuid);
-    return isBlackListed;
+    const response = {
+      isValid: isBlackListed,
+    };
+    return response;
   }
 }
