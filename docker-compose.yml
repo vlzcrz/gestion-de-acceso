@@ -1,0 +1,15 @@
+services:
+  mssql:
+    container_name: sql-server
+    image: mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04
+    restart: always
+    environment:
+      ACCEPT_EULA: ${MSSQL_EULA}
+      SA_PASSWORD: ${MSSQL_PASSWORD}
+    ports:
+      - 1433:1433
+    volumes:
+      - my-volume:/var/opt/mssql
+
+volumes:
+  my-volume:
