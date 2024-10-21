@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Put,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from 'src/auth/Application/Services/User.service';
 import { UserByEmailDTO } from '../DTOs/UserByEmail.dto';
 import { UpdateProfileDTO } from '../DTOs/UpdateUserProfile.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -17,8 +26,12 @@ export class UserController {
     return this.userService.GetUserByEmail(UserByEmailDTO);
   }
 
-  @Patch('UpdateUserProfile')
-  UpdateUserProfile(@Body() UpdateUserProfileDTO: UpdateProfileDTO) {
-    return this.userService.UpdateProfile(UpdateUserProfileDTO);
+  @Put('update-profile')
+  @UseGuards(AuthGuard('jwt'))
+  UpdateUserProfile(
+    @Body() UpdateUserProfileDTO: UpdateProfileDTO,
+    @Request() req,
+  ) {
+    return this.userService.UpdateProfile(UpdateUserProfileDTO, req.user.email);
   }
 }

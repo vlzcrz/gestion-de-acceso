@@ -28,8 +28,8 @@ export class UserService {
     return user;
   }
 
-  async UpdateProfile(UpdateProfileDTO: UpdateProfileDTO) {
-    const { email, name, firstLastName, secondLastName } = UpdateProfileDTO;
+  async UpdateProfile(UpdateProfileDTO: UpdateProfileDTO, email: string) {
+    const { name, firstLastName, secondLastName } = UpdateProfileDTO;
     const updateUser = await this.userRepository.ChangeNameAndLastNames(
       email,
       name,
