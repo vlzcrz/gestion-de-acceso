@@ -125,8 +125,8 @@ export class AuthService {
     const userEmail = Email;
     const jwt_uuid = Jwt_uuid;
 
-    const isRevoked = await this.tokenRepository.GetByJwtUuid(jwt_uuid);
-    if (isRevoked != null)
+    const isRevoked = await this.tokenRepository.ValidateTokenByUuid(jwt_uuid);
+    if (!isRevoked)
       throw new BadRequestException('This token is already blacklisted');
 
     const user = await this.userRepository.GetByEmail(userEmail);
