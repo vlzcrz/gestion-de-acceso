@@ -38,7 +38,7 @@ export class AuthService {
       options: {
         urls: ['amqp://localhost:5672'],
         queue: 'RegisterQueue',
-        queueOptions: { durable: false },
+        queueOptions: { durable: true },
       },
     });
   }
@@ -73,7 +73,17 @@ export class AuthService {
       Role,
     );
 
-    const userInserted = await this.userRepository.SaveUser(user);
+    const userInserted = await this.userRepository.CreateUser(user);
+    await this.client.connect();
+    const data = {
+      UserId: userInserted.User_uuid,
+      Name: userInserted.Name,
+      FirstLastName: userInserted.FirstLastName,
+      SecondLastName: userInserted.SecondLastName,
+      RUT: userInserted.RUT,
+      Email: userInserted.Email,
+    };
+    this.client.emit('UserCreatedEvent', data); // se emite el mensaje al MQ
     const payload = {
       Jwt_uuid: uuidv4(),
       name: userInserted.Name,

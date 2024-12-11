@@ -39,6 +39,22 @@ export class UserRepository implements IUserRepository {
     return usersDomainMapped;
   }
 
+  async CreateUser(User: UserDomain): Promise<UserOrm> {
+    const existingUser = await this.userRepository.existsBy({
+      Email: User.Email,
+    });
+
+    if (existingUser) {
+      throw new BadRequestException(
+        'This user has already been registered, please use another email',
+      );
+    }
+
+    const user = await this.userRepository.create(User);
+    const createdUser = await this.userRepository.save(user);
+    return createdUser;
+  }
+
   async SaveUser(User: UserDomain): Promise<UserDomain> {
     const existingUser = await this.userRepository.existsBy({
       Email: User.Email,
