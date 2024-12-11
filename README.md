@@ -109,7 +109,10 @@
     "secondLastName": "Segundo apellido del usuario (actualizado)",
     "rut": "Rut del usuario",
     "email": "Correo electronico del usuario",
-    "carerId": "Id de la carrera a la que pertenece el usuario",
+    "career": {
+        "career_id": "Id de la carrera a la que pertenece el usuario",
+        "name": "Nombre de la carrera a la que pertenece el usuario"
+    }
     "hashedPassword": "Contraseña hasheada con Bcrypt salt de valor 12",
     "Role": "Rol del usuario en el sistema"
   }
@@ -138,5 +141,25 @@
     "carerId": "Id de la carrera a la que pertenece el usuario",
     "hashedPassword": "Contraseña hasheada con Bcrypt salt de valor 12 (actualizada)",
     "Role": "Rol del usuario en el sistema"
+  }
+  ```
+## RABBIT MQ
+
+- **Queue**: 'events_queue'
+- **Rabbitmq URL**: localhost:5672
+
+### Queue Update Profile
+Para el evento de actualizar el perfil del usuario se deben cumplir los siguientes requisitos:
+
+- Se debe publicar el mensaje en la Queue descrita anteriormente.
+- El mensaje debe tener titulo de 'update_profile' que son los eventos que escucha este microservicio para hacer trigger el evento
+- Lo que se debe enviar como mensaje es la siguiente data:
+  **Data**:
+  ```json
+  {
+    "name": "Nombre nuevo del usuario", **OPCIONAL**
+    "firstLastName": "Apellido paterno nuevo del usuario", **OPCIONAL**
+    "secondLastName": "Apellido materno nuevo del usuario", **OPCIONAL**
+    "email": "Correo del usuario" **REQUERIDO**
   }
   ```
