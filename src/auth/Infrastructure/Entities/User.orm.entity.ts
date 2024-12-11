@@ -1,5 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Token } from './Token.orm.entity';
+import { Career } from './Career.orm.entity';
 
 @Entity('Users')
 export class User {
@@ -22,13 +31,16 @@ export class User {
   Email: string;
 
   @Column()
-  CareerId: number;
-
-  @Column()
   HashedPassword: string;
 
   @Column()
   Role: string;
+
+  @ManyToOne(() => Career, (career) => career.User, {
+    cascade: true,
+    eager: true,
+  })
+  Career: Career;
 
   @OneToMany(() => Token, (token) => token.User)
   Tokens: Token[];

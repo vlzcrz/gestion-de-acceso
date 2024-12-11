@@ -5,6 +5,7 @@ export class JwtPayload {
   SecondLastName: string;
   Email: string;
   Role: string;
+  Career: string;
   iat: number;
   exp: number;
 }

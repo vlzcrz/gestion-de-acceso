@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   Put,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from '../../Application/Services/Auth.service';
 import { RegisterUserDTO } from '../DTOs/RegisterUser.dto';
@@ -22,17 +23,17 @@ import { AuthGuard } from '@nestjs/passport';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('Register')
+  @Post('register')
   register(@Body() RegisterUserDTO: RegisterUserDTO) {
     return this.authService.registerUser(RegisterUserDTO);
   }
 
-  @Post('Login')
+  @Post('login')
   login(@Body() LoginUserDTO: LoginUserDTO) {
     return this.authService.login(LoginUserDTO);
   }
 
-  @Post('Logout')
+  @Post('logout')
   @UseGuards(AuthGuard('jwt'))
   logout(@Request() req) {
     return this.authService.logout(
@@ -43,12 +44,15 @@ export class AuthController {
     );
   }
 
-  @Post('Validate')
-  validateToken(@Body() ValidateTokenDTO: ValidateTokenDTO) {
-    return this.authService.validate(ValidateTokenDTO);
+  @Post('validate')
+  @UseGuards(AuthGuard('jwt'))
+  validateToken(@Request() req) {
+    // Esto verifica que tanto el token este firmado por el servicio y ademas que no se encuentre el token baneado (blacklist)
+    return this.authService.validate(req.user.jwt_uuid);
   }
 
   @Put('update-password')
+  @HttpCode(204)
   @UseGuards(AuthGuard('jwt'))
   updatePassword(
     @Body() UpdateUserPasswordDTO: UpdateUserPasswordDTO,

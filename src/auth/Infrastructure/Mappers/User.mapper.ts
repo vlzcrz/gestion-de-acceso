@@ -9,7 +9,7 @@ export class UserMapper {
       UserOrmEntity.SecondLastName,
       UserOrmEntity.RUT,
       UserOrmEntity.Email,
-      UserOrmEntity.CareerId,
+      UserOrmEntity.Career,
       UserOrmEntity.HashedPassword,
       UserOrmEntity.Role,
     );

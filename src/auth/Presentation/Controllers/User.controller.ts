@@ -11,6 +11,8 @@ import { UserService } from 'src/auth/Application/Services/User.service';
 import { UserByEmailDTO } from '../DTOs/UserByEmail.dto';
 import { UpdateProfileDTO } from '../DTOs/UpdateUserProfile.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { EventPattern } from '@nestjs/microservices';
+import { UpdateProfileEventDTO } from '../DTOs/UpdateUserProfileEvent.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,5 +35,10 @@ export class UserController {
     @Request() req,
   ) {
     return this.userService.UpdateProfile(UpdateUserProfileDTO, req.user.email);
+  }
+
+  @EventPattern('update_profile')
+  async handleEventUpdateProfile(UpdateProfileEventDTO: UpdateProfileEventDTO) {
+    return this.userService.processEventUpdateProfile(UpdateProfileEventDTO);
   }
 }

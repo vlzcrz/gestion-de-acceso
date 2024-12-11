@@ -15,16 +15,35 @@ import { TokenRepository } from 'src/auth/Infrastructure/Repositories/Token.repo
 import { Token } from 'src/auth/Domain/Entities/Token.entity';
 import { ValidateTokenDTO } from 'src/auth/Presentation/DTOs/ValidateToken.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { CareerRepository } from 'src/auth/Infrastructure/Repositories/Career.repository';
+import { User } from 'src/auth/Infrastructure/Entities/User.orm.entity';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
+  private client: ClientProxy;
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly tokenRepository: TokenRepository,
-  ) {}
+    private readonly careerRepopsitory: CareerRepository,
+  ) {
+    this.client = ClientProxyFactory.create({
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://localhost:5672'],
+        queue: 'RegisterQueue',
+        queueOptions: { durable: false },
+      },
+    });
+  }
 
-  async registerUser(RegisterUserDTO: RegisterUserDTO): Promise<UserDomain> {
+  async registerUser(RegisterUserDTO: RegisterUserDTO) {
     const {
       name,
       firstLastName,
@@ -39,6 +58,7 @@ export class AuthService {
     if (password != repeatedPassword)
       throw new BadRequestException("Password doesn't match repeated password");
 
+    const career = await this.careerRepopsitory.GetCareerById(careerId);
     const Role = 'student';
     const salt = await bcrypt.genSalt(12);
     const HashedPassword = await bcrypt.hash(password, salt);
@@ -48,36 +68,53 @@ export class AuthService {
       secondLastName,
       rut,
       email,
-      careerId,
+      career,
       HashedPassword,
       Role,
     );
 
     const userInserted = await this.userRepository.SaveUser(user);
-    return userInserted;
+    const payload = {
+      Jwt_uuid: uuidv4(),
+      name: userInserted.Name,
+      firstLastName: userInserted.FirstLastName,
+      secondLastName: userInserted.SecondLastName,
+      email: userInserted.Email,
+      role: userInserted.Role,
+      career: userInserted.Career.Name,
+    };
+    const jwt = await this.jwtService.sign(payload);
+    const response = {
+      ...payload,
+      token: jwt,
+    };
+    return response;
   }
 
   async login(LoginUserDTO: LoginUserDTO) {
     const { email, password } = LoginUserDTO;
-    const user = await this.userRepository.GetByEmail(email);
+    const user: UserDomain = await this.userRepository.GetByEmail(email);
     if (!user) throw new BadRequestException('Email not found');
     const isPasswordMatch = await bcrypt.compare(password, user.HashedPassword);
     if (!isPasswordMatch) throw new BadRequestException('Incorrect Password');
     const payload = {
       Jwt_uuid: uuidv4(),
-      Name: user.Name,
-      FirstLastName: user.FirstLastName,
-      SecondLastName: user.SecondLastName,
-      Email: user.Email,
-      Role: user.Role,
+      name: user.Name,
+      firstLastName: user.FirstLastName,
+      secondLastName: user.SecondLastName,
+      email: user.Email,
+      role: user.Role,
+      career: user.Career.Name,
     };
     const jwt = await this.jwtService.sign(payload);
-    const token = {
+    const response = {
+      ...payload,
       token: jwt,
     };
-    return token;
+    return response;
   }
 
+  /*
   async logoutWithDto(LogoutUserDTO: LogoutUserDTO) {
     // aqui mediante el DTO me entregan el JWT token
     // lo que debe de hacer logout es agregar el token a la base de datos (ya que estaria agregandose a la blacklist de token para no ser utilizado nuevamente)
@@ -112,6 +149,7 @@ export class AuthService {
     };
     return response;
   }
+    */
 
   async logout(
     Jwt_uuid: string,
@@ -119,9 +157,6 @@ export class AuthService {
     Issued_at: number,
     Expired_at: number,
   ) {
-    // aqui mediante el DTO me entregan el JWT token
-    // lo que debe de hacer logout es agregar el token a la base de datos (ya que estaria agregandose a la blacklist de token para no ser utilizado nuevamente)
-
     const userEmail = Email;
     const jwt_uuid = Jwt_uuid;
 
@@ -154,8 +189,6 @@ export class AuthService {
     Jwt_uuid: string,
     Email: string,
   ) {
-    console.log(Jwt_uuid);
-    console.log(Email);
     const isValid = await this.tokenRepository.ValidateTokenByUuid(Jwt_uuid);
     if (!isValid) throw new BadRequestException('This token is blacklisted');
     const { currentPassword, password, repeatedPassword } =
@@ -174,22 +207,20 @@ export class AuthService {
       );
     const salt = await bcrypt.genSalt(12);
     const newHashedPassword = await bcrypt.hash(password, salt);
-    const updateUser = await this.userRepository.ChangeHashedPassword(
-      Email,
-      newHashedPassword,
-    );
-    return updateUser;
+    await this.userRepository.ChangeHashedPassword(Email, newHashedPassword);
   }
 
-  async validate(ValidateTokenDTO: ValidateTokenDTO) {
-    const { token } = ValidateTokenDTO;
-    const decodedToken = await this.jwtService.decode(token);
-    const token_uuid = decodedToken.Jwt_uuid;
+  async validate(jwt_uuid: string) {
     const isBlackListed =
-      await this.tokenRepository.ValidateTokenByUuid(token_uuid);
+      await this.tokenRepository.ValidateTokenByUuid(jwt_uuid);
     const response = {
       isValid: isBlackListed,
     };
     return response;
+  }
+
+  async sendUserCreatedEvent(data: any) {
+    await this.client.connect();
+    return this.client.emit('UserCreatedEvent', data); // Envía el evento
   }
 }

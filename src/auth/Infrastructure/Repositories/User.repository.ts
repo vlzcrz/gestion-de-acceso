@@ -14,20 +14,14 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   async GetByEmail(User_email: string): Promise<UserDomain | null> {
-    const queryBuilder = await this.userRepository.createQueryBuilder('users');
-    const userExist = await queryBuilder
-      .where('Email = :Email', {
-        Email: User_email,
-      })
-      .getExists();
+    const userExist = await this.userRepository.existsBy({
+      Email: User_email,
+    });
 
-    if (!userExist) return null;
-
-    const user = await queryBuilder
-      .where('Email = :Email', {
-        Email: User_email,
-      })
-      .getOne();
+    if (!userExist) throw new BadRequestException("The user doesn't exist");
+    const user = await this.userRepository.findOneBy({
+      Email: User_email,
+    });
 
     const userDomainMapped = UserMapper.toDomainEntity(user);
     return userDomainMapped;
@@ -46,6 +40,16 @@ export class UserRepository implements IUserRepository {
   }
 
   async SaveUser(User: UserDomain): Promise<UserDomain> {
+    const existingUser = await this.userRepository.existsBy({
+      Email: User.Email,
+    });
+
+    if (existingUser) {
+      throw new BadRequestException(
+        'This user has already been registered, please use another email',
+      );
+    }
+
     const user = await this.userRepository.create(User);
     await this.userRepository.save(user);
     const userDomainMapped = UserMapper.toDomainEntity(user);

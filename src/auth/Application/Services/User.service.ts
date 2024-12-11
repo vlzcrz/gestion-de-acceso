@@ -6,6 +6,7 @@ import {
 import { UserRepository } from 'src/auth/Infrastructure/Repositories/User.repository';
 import { UpdateUserPasswordDTO } from 'src/auth/Presentation/DTOs/UpdateUserPassword.dto';
 import { UpdateProfileDTO } from 'src/auth/Presentation/DTOs/UpdateUserProfile.dto';
+import { UpdateProfileEventDTO } from 'src/auth/Presentation/DTOs/UpdateUserProfileEvent.dto';
 import { UserByEmailDTO } from 'src/auth/Presentation/DTOs/UserByEmail.dto';
 
 @Injectable()
@@ -41,5 +42,13 @@ export class UserService {
         'There is no user associated with this Email',
       );
     return updateUser;
+  }
+
+  async processEventUpdateProfile(
+    UpdateProfileEventDTO: UpdateProfileEventDTO,
+  ) {
+    console.log('Evento recibido en el consumidor:', UpdateProfileEventDTO);
+    const { email, ...UpdateProfileDTO } = UpdateProfileEventDTO;
+    await this.UpdateProfile(UpdateProfileDTO, email);
   }
 }

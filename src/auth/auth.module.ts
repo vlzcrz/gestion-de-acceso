@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './Infrastructure/Entities/User.orm.entity';
 import { Token } from './Infrastructure/Entities/Token.orm.entity';
@@ -12,11 +12,14 @@ import { TokenRepository } from './Infrastructure/Repositories/Token.repository'
 import { JwtStrategy } from './Strategies/Jwt.strategy';
 import { UserController } from './Presentation/Controllers/User.controller';
 import { UserService } from './Application/Services/User.service';
+import { Career } from './Infrastructure/Entities/Career.orm.entity';
+import { CareerRepository } from './Infrastructure/Repositories/Career.repository';
+import { CareerSeedService } from './Seeders/Services/CareerSeed.service';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User, Token]),
+    TypeOrmModule.forFeature([User, Token, Career]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -37,7 +40,14 @@ import { UserService } from './Application/Services/User.service';
     UserService,
     UserRepository,
     TokenRepository,
+    CareerRepository,
+    CareerSeedService,
     JwtStrategy,
   ],
 })
-export class AuthModule {}
+export class AuthModule implements OnModuleInit {
+  constructor(private readonly careerSeedService: CareerSeedService) {}
+  async onModuleInit() {
+    await this.careerSeedService.seedCareer();
+  }
+}

@@ -1,3 +1,5 @@
+import { Career } from 'src/auth/Infrastructure/Entities/Career.orm.entity';
+
 export class User {
   constructor(
     public Name: string,
@@ -10,7 +12,7 @@ export class User {
 
     public Email: string,
 
-    public CareerId: number,
+    public Career: Career,
 
     public HashedPassword: string,
 
