@@ -27,6 +27,19 @@ export class UserRepository implements IUserRepository {
     return userDomainMapped;
   }
 
+  async GetByEmailLogin(User_email: string): Promise<UserOrm> {
+    const userExist = await this.userRepository.existsBy({
+      Email: User_email,
+    });
+
+    if (!userExist) throw new BadRequestException("The user doesn't exist");
+    const user = await this.userRepository.findOneBy({
+      Email: User_email,
+    });
+
+    return user;
+  }
+
   async GetAll(): Promise<UserDomain[] | null> {
     const users = await this.userRepository.find();
     if (users.length == 0) {

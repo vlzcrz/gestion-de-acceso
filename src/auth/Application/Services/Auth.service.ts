@@ -86,12 +86,12 @@ export class AuthService {
     this.client.emit('UserCreatedEvent', data); // se emite el mensaje al MQ
     const payload = {
       Jwt_uuid: uuidv4(),
-      name: userInserted.Name,
-      firstLastName: userInserted.FirstLastName,
-      secondLastName: userInserted.SecondLastName,
-      email: userInserted.Email,
-      role: userInserted.Role,
-      career: userInserted.Career.Name,
+      Name: userInserted.Name,
+      FirstLastName: userInserted.FirstLastName,
+      SecondLastName: userInserted.SecondLastName,
+      Email: userInserted.Email,
+      Role: userInserted.Role,
+      Career: userInserted.Career.Name,
     };
     const jwt = await this.jwtService.sign(payload);
     const response = {
@@ -103,63 +103,27 @@ export class AuthService {
 
   async login(LoginUserDTO: LoginUserDTO) {
     const { email, password } = LoginUserDTO;
-    const user: UserDomain = await this.userRepository.GetByEmail(email);
+    const user: User = await this.userRepository.GetByEmailLogin(email);
     if (!user) throw new BadRequestException('Email not found');
     const isPasswordMatch = await bcrypt.compare(password, user.HashedPassword);
     if (!isPasswordMatch) throw new BadRequestException('Incorrect Password');
     const payload = {
       Jwt_uuid: uuidv4(),
-      name: user.Name,
-      firstLastName: user.FirstLastName,
-      secondLastName: user.SecondLastName,
-      email: user.Email,
-      role: user.Role,
-      career: user.Career.Name,
+      Name: user.Name,
+      FirstLastName: user.FirstLastName,
+      SecondLastName: user.SecondLastName,
+      Email: user.Email,
+      Role: user.Role,
+      Career: user.Career.Name,
     };
     const jwt = await this.jwtService.sign(payload);
     const response = {
       ...payload,
+      UserId: user.User_uuid,
       token: jwt,
     };
     return response;
   }
-
-  /*
-  async logoutWithDto(LogoutUserDTO: LogoutUserDTO) {
-    // aqui mediante el DTO me entregan el JWT token
-    // lo que debe de hacer logout es agregar el token a la base de datos (ya que estaria agregandose a la blacklist de token para no ser utilizado nuevamente)
-    const { token } = LogoutUserDTO;
-    const decodedToken = await this.jwtService.decode(token);
-    if (!decodedToken) {
-      throw new BadRequestException('Invalid jwt token');
-    }
-    const userEmail = decodedToken.Email;
-    const jwt_uuid = decodedToken.Jwt_uuid;
-
-    const isRevoked = await this.tokenRepository.GetByJwtUuid(jwt_uuid);
-    if (isRevoked != null)
-      throw new BadRequestException('This token is already blacklisted');
-
-    const user = await this.userRepository.GetByEmail(userEmail);
-    const issued_at = new Date(decodedToken.iat);
-    const revoked_at = new Date();
-    const expired_at = new Date(decodedToken.exp);
-    const blacklistToken = new Token(
-      jwt_uuid,
-      user,
-      issued_at,
-      revoked_at,
-      expired_at,
-    );
-
-    console.log(blacklistToken);
-    await this.tokenRepository.SaveToken(blacklistToken);
-    const response = {
-      message: 'The token is now blacklisted',
-    };
-    return response;
-  }
-    */
 
   async logout(
     Jwt_uuid: string,
@@ -199,13 +163,15 @@ export class AuthService {
     Jwt_uuid: string,
     Email: string,
   ) {
+    console.log(Email);
     const isValid = await this.tokenRepository.ValidateTokenByUuid(Jwt_uuid);
     if (!isValid) throw new BadRequestException('This token is blacklisted');
     const { currentPassword, password, repeatedPassword } =
       UpdateUserPasswordDTO;
     if (password != repeatedPassword)
       throw new BadRequestException("The new password doesn't match");
-    const user = await this.userRepository.GetByEmail(Email);
+    const user = await this.userRepository.GetByEmailLogin(Email);
+    console.log(user);
     if (!user) throw new BadRequestException('This Email is not valid'); //aqui bien ya es un indicador que el token ha sido modificado o bien el usuario ha eliminado la cuenta
     const isCurrendPasswordValid = await bcrypt.compare(
       currentPassword,
