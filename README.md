@@ -5,9 +5,10 @@
 ## Para levantar este proyecto de manera local siga las instrucciones
 
 - 1. Descargue e instale Node en su versión LTS > 20.x.x
-- 2. Dirigase al directorio del proyecto y ejecute 'npm install'
+- 2. En el directorio del proyecto ejecute 'npm install'
 - 3. Cree un archivo .env en el root del directorio con las claves y valores de .env.template.local:
-- 4. Ejecute 'npm run start'
+- 4. En el directorio del proyecto ejecute: 'docker compose up -d' para iniciar la base de datos propia de este microservicio en un contenedor docker.
+- 5. En el directorio del proyecto ejecute 'npm run start'
 
 ## Endpoints
 
@@ -143,12 +144,14 @@
     "Role": "Rol del usuario en el sistema"
   }
   ```
+
 ## RABBIT MQ
 
 - **Queue**: 'events_queue'
 - **Rabbitmq URL**: localhost:5672
 
 ### Queue Update Profile
+
 Para el evento de actualizar el perfil del usuario se deben cumplir los siguientes requisitos:
 
 - Se debe publicar el mensaje en la Queue descrita anteriormente.
