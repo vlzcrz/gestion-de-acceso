@@ -75,7 +75,7 @@
 
 ### Validate Token
 
-- **URL**: `PUT localhost:3000/auth/validate`
+- **URL**: `POST localhost:3000/auth/validate`
 - **Descripción**: verifica que el token no este revocado (que no se encuentre en la blacklist) entrega un boolean (true si es valudo su uso, y falso si ya esta presente en la blacklist)
 - **Cuerpo**:
   ```json
